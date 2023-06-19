@@ -40,7 +40,7 @@ public class Sliding : MonoBehaviour
     {
         sliding = true;
         playerObj.localScale = new Vector3(playerObj.localScale.x, slideYScale, playerObj.localScale.z);
-        rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
+        rb.AddForce(Vector3.down * 3f, ForceMode.Impulse);
 
         slideTimer = maxSlideTime;
     }
@@ -50,7 +50,7 @@ public class Sliding : MonoBehaviour
         Vector3 inputDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
         rb.AddForce(inputDirection.normalized * slideForce, ForceMode.Force);
         slideTimer -= Time.deltaTime;
-        if (slideTimer > 0)
+        if (slideTimer < 0)
             StopSlide();
     }
 
@@ -63,17 +63,18 @@ public class Sliding : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        horizontalInput = Input.GetAxisRaw("Horizontal");
-        verticalInput = Input.GetAxisRaw("Vertical");
-        
-        if (Input.GetKeyDown(slideKey) && (horizontalInput != 0 || verticalInput != 0))
-            StartSlide();
-        if (Input.GetKeyUp(slideKey) && sliding)
-            StopSlide();
+
     }
     private void FixedUpdate()
     {
-        if (sliding)
+		horizontalInput = Input.GetAxisRaw("Horizontal");
+		verticalInput = Input.GetAxisRaw("Vertical");
+
+		if (Input.GetKeyDown(slideKey) && (Input.GetKey(pm.sprintKey)) && (horizontalInput != 0 || verticalInput != 0))
+			StartSlide();
+		if (Input.GetKeyUp(slideKey) && sliding)
+			StopSlide();
+		if (sliding)
             SlidingMovement();
     }
 }
