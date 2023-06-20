@@ -9,7 +9,8 @@ public class Menu_Cod : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     // Update is called once per frame
@@ -20,11 +21,16 @@ public class Menu_Cod : MonoBehaviour
 
     public void Play()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         SceneManager.LoadScene(1);
+
     }
     public void Tutorial()
     {
-        //SceneManager.LoadScene(2);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        SceneManager.LoadScene(2);
     }
     public void Quit()
     {

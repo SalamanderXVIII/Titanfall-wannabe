@@ -16,6 +16,7 @@ public class Pause_Menu : MonoBehaviour
     {
         Menu.SetActive(false);
         Time.timeScale = 1f;
+       
     }
 
     // Update is called once per frame
@@ -35,13 +36,15 @@ public class Pause_Menu : MonoBehaviour
         {
             Menu.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
+                Cursor.visible= true;
             Time.timeScale = 0f;
         }
         else
         {
             Menu.SetActive(false);
             Cursor.lockState = CursorLockMode.Locked;
-            Time.timeScale = 1f;
+                Cursor.visible = false;
+                Time.timeScale = 1f;
         }
         }
 
@@ -50,10 +53,12 @@ public class Pause_Menu : MonoBehaviour
     {
         Menu.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         check = false;
     }
     public void Restart()
     {
+
         SceneManager.LoadScene(1);
 
         rest_try++;

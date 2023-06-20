@@ -21,6 +21,7 @@ public class Finish_Box : MonoBehaviour
         checker = true;
         Menu.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         //Debug.Log(a);
         Update();
         ResultT.text = Timer.text;
@@ -35,6 +36,8 @@ public class Finish_Box : MonoBehaviour
     }
     public void Restart()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         SceneManager.LoadScene(1);
     }
     public void Exit()
