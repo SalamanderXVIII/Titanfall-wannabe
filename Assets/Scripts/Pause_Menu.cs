@@ -58,15 +58,14 @@ public class Pause_Menu : MonoBehaviour
     }
     public void Restart()
     {
-
-        SceneManager.LoadScene(1);
-
         rest_try++;
         if (Finish.active == true) rest_try = 0;
-    }
+		SceneManager.LoadScene(1);
+
+	}
 
 
-    public void Exit()
+	public void Exit()
     {
         SceneManager.LoadScene(0);
     }

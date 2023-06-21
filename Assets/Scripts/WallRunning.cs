@@ -35,10 +35,15 @@ public class WallRunning : MonoBehaviour
     private bool wallLeft;
     private bool wallRight;
 
+    [Header("Gravity")]
+    public bool useGravity;
+    public float gravityCounterForce;
+
     [Header("References")]
     public Transform orientation;
     private PlayerMovement pm;
     private Rigidbody rb;
+    public PlayerCam cam;
 
     void Start()
     {
@@ -75,7 +80,6 @@ public class WallRunning : MonoBehaviour
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
-
         upwardsRunning = Input.GetKey(upwardsRunKey);
         downwardsRunning = Input.GetKey(downwardsRunKey);
 
@@ -85,6 +89,18 @@ public class WallRunning : MonoBehaviour
             {
                 StartWallRun();
 			}
+
+            if (wallRunTime > 0)
+            {
+                wallRunTime -= Time.deltaTime;
+            }
+
+            if ((wallRunTime <= 0) && (pm.wallrunning == true))
+            {
+                exitingWall = true;
+                exitWallTimer = exitWallTime;
+            }
+
             if (Input.GetKey(pm.jumpKey))
             {
                 WallJump();
@@ -117,38 +133,54 @@ public class WallRunning : MonoBehaviour
     {
         pm.wallrunning = true;
         pm.doubleJumpReady = true;
-    }
+        wallRunTime = maxWallRunTime;
+		rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        cam.SetFov(95f);
+        if (wallLeft)
+            cam.SetTilt(-5f);
+		if (wallRight)
+			cam.SetTilt(5f);
+	}
 
     private void WallRunningMovement()
     {
-        rb.useGravity = false;
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-
+        rb.useGravity = useGravity;
         Vector3 wallNormal = wallRight ? rightWallhit.normal : leftWallhit.normal;
-
         Vector3 wallForward = Vector3.Cross(wallNormal, transform.up);
-
         if ((orientation.forward - wallForward).magnitude > (orientation.forward - -wallForward).magnitude)
         {
             wallForward = -wallForward;
         }
-
         rb.AddForce(wallForward * wallRunForce, ForceMode.Force);
 
         if (upwardsRunning)
             rb.velocity = new Vector3(rb.velocity.x, wallClimbSpeed, rb.velocity.z);
+
 		if (downwardsRunning)
 			rb.velocity = new Vector3(rb.velocity.x, -wallClimbSpeed, rb.velocity.z);
 
-
 		if (!(wallLeft && horizontalInput > 0) && !(wallRight && horizontalInput < 0))
         rb.AddForce(-wallNormal * 100, ForceMode.Force);
+
+        if (useGravity)
+        {
+            rb.AddForce(transform.up * gravityCounterForce, ForceMode.Force);
+        }
     }
 
     private void StopWallRun()
     {
         pm.wallrunning = false;
-    }
+        if(Input.GetKey(pm.sprintKey))
+        {
+            cam.SetFov(90f);
+        }
+        else 
+        {
+			cam.SetFov(80f);
+		}
+        cam.SetTilt(0);
+	}
 
     private void WallJump()
     {

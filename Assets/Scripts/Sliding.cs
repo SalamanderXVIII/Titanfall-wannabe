@@ -11,14 +11,17 @@ public class Sliding : MonoBehaviour
     public Transform playerObj;
     private Rigidbody rb;
     private PlayerMovement pm;
+    public PlayerCam cam;
 
     [Header("Sliding")]
     public float maxSlideTime;
     public float slideForce;
-    private float slideTimer;
-
-    public float slideYScale;
-    private float startYScale;
+	public float slideCooldownMax;
+	public float slideYScale;
+	private float slideCooldown;
+	public float slideTimer;
+	private bool slideReady = true;
+	private float startYScale;
 
     [Header("Input")]
     public KeyCode slideKey = KeyCode.LeftControl;
@@ -41,8 +44,10 @@ public class Sliding : MonoBehaviour
         sliding = true;
         playerObj.localScale = new Vector3(playerObj.localScale.x, slideYScale, playerObj.localScale.z);
         rb.AddForce(Vector3.down * 3f, ForceMode.Impulse);
-
-        slideTimer = maxSlideTime;
+        slideCooldown = slideCooldownMax;
+		slideTimer = maxSlideTime;
+        slideReady = false;
+        cam.SetIncline(-5f);
     }
 
     private void SlidingMovement()
@@ -57,8 +62,18 @@ public class Sliding : MonoBehaviour
     private void StopSlide()
     {
         sliding = false;
-        playerObj.localScale = new Vector3(playerObj.localScale.x, startYScale, playerObj.localScale.z);
-    }
+		cam.SetIncline(0f);
+		if (!Input.GetKey(slideKey) && pm.cealing == false)
+        {
+			playerObj.localScale = new Vector3(playerObj.localScale.x, startYScale, playerObj.localScale.z);
+		}
+        else
+        {
+            pm.state = PlayerMovement.MovementState.crouching;
+			pm.moveSpeed = pm.crouchSpeed;
+			cam.SetFov(80f);
+        }
+	}
 
     // Update is called once per frame
     void Update()
@@ -70,11 +85,24 @@ public class Sliding : MonoBehaviour
 		horizontalInput = Input.GetAxisRaw("Horizontal");
 		verticalInput = Input.GetAxisRaw("Vertical");
 
-		if (Input.GetKeyDown(slideKey) && (Input.GetKey(pm.sprintKey)) && (horizontalInput != 0 || verticalInput != 0))
+		if (Input.GetKeyDown(slideKey) && (Input.GetKey(pm.sprintKey)) && (horizontalInput != 0 || verticalInput != 0) && (slideReady == true))
 			StartSlide();
 		if (Input.GetKeyUp(slideKey) && sliding)
 			StopSlide();
 		if (sliding)
             SlidingMovement();
+        else
+            SlideReset();
     }
+
+    void SlideReset()
+    {
+        if (slideReady == false)
+		    slideCooldown -= Time.deltaTime;
+		if (slideCooldown < 0)
+        {
+			slideReady = true;
+            slideCooldown = slideCooldownMax;
+		}
+	}
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class PlayerCam : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class PlayerCam : MonoBehaviour
     public float sensY;
 
     public Transform orientation;
+    public Transform camHolder;
 
     float xRotation;
     float yRotation;
@@ -28,7 +30,27 @@ public class PlayerCam : MonoBehaviour
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
+        camHolder.rotation = Quaternion.Euler(xRotation, yRotation, 0);
         orientation.rotation = Quaternion.Euler(0, yRotation, 0);
+    }
+
+    public void SetFov(float endValue)
+    {
+        GetComponent<Camera>().DOFieldOfView(endValue, 0.25f);
+    }
+
+    public void SetTilt(float tilt)
+    {
+        transform.DOLocalRotate(new Vector3(0, 0, tilt), 0.25f);
+    }
+
+	public void SetIncline(float tilt)
+	{
+		transform.DOLocalRotate(new Vector3(tilt, 0, 0), 0.25f);
+	}
+
+	public void CameraLandingShake()
+    {
+        GetComponent<Camera>().DOShakeRotation(0.1f, new Vector3(1, 0, 0), 1, 0, true, ShakeRandomnessMode.Harmonic);
     }
 }
