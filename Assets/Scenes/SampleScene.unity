@@ -3985,7 +3985,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1446129422}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -36.00158, y: -23.858765, z: -8}
+  m_LocalPosition: {x: -36.00158, y: -23.858765, z: -10.18}
   m_LocalScale: {x: 4, y: 1, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4601,6 +4601,8 @@ MonoBehaviour:
   moveDirection: {x: 0, y: 0, z: 0}
   wallrunning: 0
   slideSpeed: 30
+  desiredMoveSpeed: 0
+  lastDesiredMoveSpeed: 0
   sliding: 0
   speedIncreaseMultiplier: 1.5
   slopeIncreaseMultiplier: 2.5
@@ -4654,9 +4656,9 @@ MonoBehaviour:
   orientation: {fileID: 1294111242}
   playerObj: {fileID: 102571548}
   cam: {fileID: 64922264}
-  maxSlideTime: 0.75
-  slideForce: 100
-  slideCooldownMax: 1
+  maxSlideTime: 0.5
+  slideForce: 75
+  slideCooldownMax: 2
   slideYScale: 0.5
   slideTimer: 0
   slideKey: 306
@@ -4681,9 +4683,9 @@ MonoBehaviour:
   wallRunForce: 100
   wallClimbSpeed: 3
   maxWallRunTime: 1.5
-  wallJumpUpForce: 6
+  wallJumpUpForce: 4
   wallJumpSideForce: 10
-  maxWallCooldown: 6
+  maxWallCooldown: 4
   wallTimer: 0
   exitWallTime: 0.2
   upwardsRunKey: 304

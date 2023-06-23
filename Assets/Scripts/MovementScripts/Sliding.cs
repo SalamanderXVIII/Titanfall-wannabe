@@ -77,7 +77,7 @@ public class Sliding : MonoBehaviour
         else
         {
             pm.state = PlayerMovement.MovementState.crouching;
-			pm.moveSpeed = pm.crouchSpeed;
+			pm.desiredMoveSpeed = pm.crouchSpeed;
 			cam.SetFov(80f);
         }
 	}

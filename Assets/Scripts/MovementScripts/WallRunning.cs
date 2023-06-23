@@ -206,6 +206,7 @@ public class WallRunning : MonoBehaviour
 		}
 		cam.SetTilt(0);
 		recentWall = currentWall;
+        wallTimer = maxWallCooldown;
 	}
 
 	void WallReset()

@@ -19,8 +19,8 @@ public class PlayerMovement : MonoBehaviour
     public Vector3 moveDirection;
     public bool wallrunning;
     public float slideSpeed;
-    private float desiredMoveSpeed;
-    private float lastDesiredMoveSpeed;
+    public float desiredMoveSpeed;
+    [SerializeField] private float lastDesiredMoveSpeed;
     public bool sliding;
     public float speedIncreaseMultiplier;
     public float slopeIncreaseMultiplier;
@@ -200,15 +200,8 @@ public class PlayerMovement : MonoBehaviour
     private void Jump()
     {
 		exitingSlope = true;
-		if (OnSlope())
-        {
-            
-        }
-        else
-        {
-			rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-			rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-		}
+		rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+		rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
     }
 
 	void JumpReset()
@@ -225,7 +218,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void CealingCollisionHandler()
     {
-		cealing = Physics.Raycast(PlayerObj.position, Vector3.up, out cealingCheck, startYScale, whatIsGround);
+		cealing = Physics.Raycast(PlayerObj.position, Vector3.up, out cealingCheck, startYScale +0.3f, whatIsGround);
         if (cealing == false && !Input.GetKey(crouchKey))
         {
 			PlayerObj.localScale = new Vector3(PlayerObj.localScale.x, startYScale, PlayerObj.localScale.z);
@@ -307,11 +300,6 @@ public class PlayerMovement : MonoBehaviour
 		else
 			rb.drag = 0;
 	}
-
-    private void YPositionCheck()
-    {
-
-    }
 
 	private void OnCollisionEnter(Collision collision)
 	{
