@@ -23,12 +23,10 @@ public class Sliding : MonoBehaviour
 	private bool slideReady = true;
 	private float startYScale;
 
-    [Header("Input")]
+	[Header("Input")]
     public KeyCode slideKey = KeyCode.LeftControl;
     private float horizontalInput;
     private float verticalInput;
-
-    private bool sliding;
 
     // Start is called before the first frame update
     void Start()
@@ -41,7 +39,7 @@ public class Sliding : MonoBehaviour
 
     private void StartSlide()
     {
-        sliding = true;
+        pm.sliding = true;
         playerObj.localScale = new Vector3(playerObj.localScale.x, slideYScale, playerObj.localScale.z);
         rb.AddForce(Vector3.down * 3f, ForceMode.Impulse);
         slideCooldown = slideCooldownMax;
@@ -53,15 +51,24 @@ public class Sliding : MonoBehaviour
     private void SlidingMovement()
     {
         Vector3 inputDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
-        rb.AddForce(inputDirection.normalized * slideForce, ForceMode.Force);
-        slideTimer -= Time.deltaTime;
-        if (slideTimer < 0)
-            StopSlide();
-    }
+
+        if (!pm.OnSlope() || rb.velocity.y > -0.1f)
+        {
+			rb.AddForce(inputDirection.normalized * slideForce, ForceMode.Force);
+			slideTimer -= Time.deltaTime;
+		}
+
+        else
+        {
+            rb.AddForce(pm.GetSlopeMoveDirection(inputDirection) * slideForce, ForceMode.Force);
+        }
+		if (slideTimer < 0)
+			StopSlide();
+	}
 
     private void StopSlide()
     {
-        sliding = false;
+        pm.sliding = false;
 		cam.SetIncline(0f);
 		if (!Input.GetKey(slideKey) && pm.cealing == false)
         {
@@ -78,22 +85,26 @@ public class Sliding : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-    }
-    private void FixedUpdate()
-    {
 		horizontalInput = Input.GetAxisRaw("Horizontal");
 		verticalInput = Input.GetAxisRaw("Vertical");
+		SlideInput();
+	}
+    private void FixedUpdate()
+    {
 
-		if (Input.GetKeyDown(slideKey) && (Input.GetKey(pm.sprintKey)) && (horizontalInput != 0 || verticalInput != 0) && (slideReady == true))
-			StartSlide();
-		if (Input.GetKeyUp(slideKey) && sliding)
-			StopSlide();
-		if (sliding)
-            SlidingMovement();
-        else
-            SlideReset();
     }
+
+    void SlideInput()
+    {
+		if (Input.GetKey(slideKey) && (Input.GetKey(pm.sprintKey)) && (horizontalInput != 0 || verticalInput != 0) && (slideReady == true) && pm.grounded && (pm.state != PlayerMovement.MovementState.crouching))
+			StartSlide();
+		if (Input.GetKeyUp(slideKey) && pm.sliding)
+			StopSlide();
+		if (pm.sliding)
+			SlidingMovement();
+		else
+			SlideReset();
+	}
 
     void SlideReset()
     {

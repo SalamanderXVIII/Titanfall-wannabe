@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class WallRunning : MonoBehaviour
@@ -13,6 +14,8 @@ public class WallRunning : MonoBehaviour
     public float wallJumpUpForce;
     public float wallJumpSideForce;
     private float wallRunTime;
+    [SerializeField] float maxWallCooldown;
+    [SerializeField] float wallTimer;
 
     [Header("Exiting")]
     private bool exitingWall;
@@ -34,6 +37,7 @@ public class WallRunning : MonoBehaviour
     private RaycastHit rightWallhit;
     private bool wallLeft;
     private bool wallRight;
+    public bool IsCurrentWallViable;
 
     [Header("Gravity")]
     public bool useGravity;
@@ -44,17 +48,22 @@ public class WallRunning : MonoBehaviour
     private PlayerMovement pm;
     private Rigidbody rb;
     public PlayerCam cam;
+    public Transform playerObj;
+    public GameObject recentWall;
+    public GameObject currentWall;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         pm = GetComponent<PlayerMovement>();
+        wallTimer = maxWallCooldown;
     }
 
 	private void Update()
 	{
 		CheckForWall();
-        StateMachine();    
+        StateMachine();
+        WallReset();
 	}
 
 	private void FixedUpdate()
@@ -67,13 +76,21 @@ public class WallRunning : MonoBehaviour
 
 	private void CheckForWall()
     {
-        wallRight = Physics.Raycast(transform.position, orientation.right, out rightWallhit, wallCheckDistance, whatIsWall);
-		wallLeft = Physics.Raycast(transform.position, -orientation.right, out leftWallhit, wallCheckDistance, whatIsWall);
+        wallRight = Physics.Raycast(playerObj.position, orientation.right, out rightWallhit, wallCheckDistance, whatIsWall);
+        if (wallRight)
+        {
+			currentWall = rightWallhit.collider.gameObject;
+		}
+		wallLeft = Physics.Raycast(playerObj.position, -orientation.right, out leftWallhit, wallCheckDistance, whatIsWall);
+		if (wallLeft)
+        {
+			currentWall = leftWallhit.collider.gameObject;
+		}
 	}
 
     private bool AboveGround()
     {
-        return !Physics.Raycast(transform.position, Vector3.down, minJumpHeight, whatIsGround);
+        return !Physics.Raycast(playerObj.position, Vector3.down, minJumpHeight, whatIsGround);
     }
 
     private void StateMachine()
@@ -85,7 +102,7 @@ public class WallRunning : MonoBehaviour
 
         if ((wallLeft || wallRight) && verticalInput > 0 && AboveGround() && !exitingWall)
         {
-            if(!pm.wallrunning)
+            if(!pm.wallrunning && Input.GetKey(pm.sprintKey) && IsCurrentWallViable && (recentWall != currentWall))
             {
                 StartWallRun();
 			}
@@ -101,7 +118,7 @@ public class WallRunning : MonoBehaviour
                 exitWallTimer = exitWallTime;
             }
 
-            if (Input.GetKey(pm.jumpKey))
+            if (Input.GetKey(pm.jumpKey) && (recentWall != currentWall))
             {
                 WallJump();
             }
@@ -164,7 +181,7 @@ public class WallRunning : MonoBehaviour
 
         if (useGravity)
         {
-            rb.AddForce(transform.up * gravityCounterForce, ForceMode.Force);
+            rb.AddForce(playerObj.up * gravityCounterForce, ForceMode.Force);
         }
     }
 
@@ -179,16 +196,36 @@ public class WallRunning : MonoBehaviour
         {
 			cam.SetFov(80f);
 		}
-        cam.SetTilt(0);
+        if (wallLeft)
+        {
+            rb.AddForce(playerObj.right * 5f, ForceMode.Impulse);
+        }
+		if (wallRight)
+		{
+			rb.AddForce(-playerObj.right * 5f, ForceMode.Impulse);
+		}
+		cam.SetTilt(0);
+		recentWall = currentWall;
 	}
 
-    private void WallJump()
+	void WallReset()
+	{
+		if (recentWall == currentWall)
+			wallTimer -= Time.deltaTime;
+		if (wallTimer < 0)
+		{
+			recentWall = null;
+			wallTimer = maxWallCooldown;
+		}
+	}
+
+	private void WallJump()
     {
         exitingWall= true;
         exitWallTimer = exitWallTime;
 
         Vector3 wallNormal = wallRight ? rightWallhit.normal : leftWallhit.normal;
-        Vector3 forceToApply = transform.up * wallJumpUpForce + wallNormal * wallJumpSideForce;
+        Vector3 forceToApply = playerObj.up * wallJumpUpForce + wallNormal * wallJumpSideForce;
 
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
         rb.AddForce(forceToApply, ForceMode.Impulse);
