@@ -6,7 +6,6 @@ using UnityEngine;
 public class WallRunning : MonoBehaviour
 {
     [Header("Wallrunning")]
-    public LayerMask whatIsWall;
     public LayerMask whatIsGround;
     public float wallRunForce;
     public float wallClimbSpeed;
@@ -14,6 +13,8 @@ public class WallRunning : MonoBehaviour
     public float wallJumpUpForce;
     public float wallJumpSideForce;
     private float wallRunTime;
+    private bool wallJumpAvailable = true;
+    [SerializeField] private float wallJumpCooldown;
     [SerializeField] float maxWallCooldown;
     [SerializeField] float wallTimer;
 
@@ -76,12 +77,12 @@ public class WallRunning : MonoBehaviour
 
 	private void CheckForWall()
     {
-        wallRight = Physics.Raycast(playerObj.position, orientation.right, out rightWallhit, wallCheckDistance, whatIsWall);
+        wallRight = Physics.Raycast(playerObj.position, orientation.right, out rightWallhit, wallCheckDistance, whatIsGround);
         if (wallRight)
         {
 			currentWall = rightWallhit.collider.gameObject;
 		}
-		wallLeft = Physics.Raycast(playerObj.position, -orientation.right, out leftWallhit, wallCheckDistance, whatIsWall);
+		wallLeft = Physics.Raycast(playerObj.position, -orientation.right, out leftWallhit, wallCheckDistance, whatIsGround);
 		if (wallLeft)
         {
 			currentWall = leftWallhit.collider.gameObject;
@@ -118,7 +119,7 @@ public class WallRunning : MonoBehaviour
                 exitWallTimer = exitWallTime;
             }
 
-            if (Input.GetKey(pm.jumpKey) && (recentWall != currentWall))
+            if (Input.GetKey(pm.jumpKey) && (recentWall != currentWall) && wallJumpAvailable)
             {
                 WallJump();
             }
@@ -185,6 +186,11 @@ public class WallRunning : MonoBehaviour
         }
     }
 
+    void ResetWallJump()
+    {
+        wallJumpAvailable = true;
+    }
+
     private void StopWallRun()
     {
         pm.wallrunning = false;
@@ -211,7 +217,7 @@ public class WallRunning : MonoBehaviour
 
 	void WallReset()
 	{
-		if (recentWall == currentWall)
+		if (recentWall == currentWall && recentWall != null)
 			wallTimer -= Time.deltaTime;
 		if (wallTimer < 0)
 		{
@@ -224,11 +230,14 @@ public class WallRunning : MonoBehaviour
     {
         exitingWall= true;
         exitWallTimer = exitWallTime;
+        wallJumpAvailable = false;
 
         Vector3 wallNormal = wallRight ? rightWallhit.normal : leftWallhit.normal;
         Vector3 forceToApply = playerObj.up * wallJumpUpForce + wallNormal * wallJumpSideForce;
 
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
         rb.AddForce(forceToApply, ForceMode.Impulse);
+
+        Invoke(nameof(ResetWallJump), wallJumpCooldown);
     }
 }

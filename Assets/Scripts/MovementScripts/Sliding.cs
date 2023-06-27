@@ -18,7 +18,7 @@ public class Sliding : MonoBehaviour
     public float slideForce;
 	public float slideCooldownMax;
 	public float slideYScale;
-	private float slideCooldown;
+	public float slideCooldown;
 	public float slideTimer;
 	private bool slideReady = true;
 	private float startYScale;
@@ -52,7 +52,7 @@ public class Sliding : MonoBehaviour
     {
         Vector3 inputDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
-        if (!pm.OnSlope() || rb.velocity.y > -0.1f)
+        if (!pm.OnSlope() || rb.velocity.y > -0.1f || pm.slopeAngle < 20)
         {
 			rb.AddForce(inputDirection.normalized * slideForce, ForceMode.Force);
 			slideTimer -= Time.deltaTime;
@@ -70,16 +70,16 @@ public class Sliding : MonoBehaviour
     {
         pm.sliding = false;
 		cam.SetIncline(0f);
-		if (!Input.GetKey(slideKey) && pm.cealing == false)
+        if (!Input.GetKey(slideKey) && pm.cealing == false)
         {
-			playerObj.localScale = new Vector3(playerObj.localScale.x, startYScale, playerObj.localScale.z);
-		}
+            playerObj.localScale = new Vector3(playerObj.localScale.x, startYScale, playerObj.localScale.z);
+        }
         else
         {
-            pm.state = PlayerMovement.MovementState.crouching;
+			pm.state = PlayerMovement.MovementState.crouching;
 			pm.desiredMoveSpeed = pm.crouchSpeed;
 			cam.SetFov(80f);
-        }
+		}
 	}
 
     // Update is called once per frame

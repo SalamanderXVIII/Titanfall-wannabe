@@ -20,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     public bool wallrunning;
     public float slideSpeed;
     public float desiredMoveSpeed;
+    public float slopeAngle;
     [SerializeField] private float lastDesiredMoveSpeed;
     public bool sliding;
     public float speedIncreaseMultiplier;
@@ -98,7 +99,7 @@ public class PlayerMovement : MonoBehaviour
 
         CrouchCheck();
 
-        if (Input.GetKeyDown(sprintKey) && !(state == MovementState.crouching))
+        if (Input.GetKey(sprintKey) && !(state == MovementState.crouching))
         {
             cam.SetFov(90f);
         }
@@ -182,9 +183,9 @@ public class PlayerMovement : MonoBehaviour
             else
 				moveSpeed = Mathf.Lerp(startValue, desiredMoveSpeed, time / difference*2);
 
-			if (OnSlope())
+            if (OnSlope())
             {
-                float slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+                slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
                 float slopeAngleIncrease = 1 + (slopeAngle / 90f);
                 time += Time.deltaTime * speedIncreaseMultiplier * slopeIncreaseMultiplier * slopeAngleIncrease;
             }
@@ -282,8 +283,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight * 0.5f + 0.3f))
         {
-            float angle = Vector3.Angle(Vector3.up, slopeHit.normal);
-            return angle < maxSlopeAngle && angle != 0;
+            slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+            return slopeAngle < maxSlopeAngle && slopeAngle != 0;
         }
         return false;
     }
