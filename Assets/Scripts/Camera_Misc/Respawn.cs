@@ -6,10 +6,12 @@ using UnityEngine;
 public class Respawn : MonoBehaviour
 {
     [SerializeField] private PlayerMovement pm;
+    public Transform start;
     public Transform checkpoint;
 
     void Start()
     {
+        checkpoint.position = start.position;
     }
 
     void Update()
@@ -29,5 +31,13 @@ public class Respawn : MonoBehaviour
         {
             RespawnMethod();
         }
+	}
+
+	private void OnTriggerEnter(Collider other)
+	{
+		if (other.gameObject.layer == 8)
+		{
+			checkpoint.position = other.gameObject.transform.position;
+		}
 	}
 }

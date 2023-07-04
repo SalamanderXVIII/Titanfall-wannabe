@@ -23,7 +23,7 @@ public class Menu_Cod : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(3);
 
     }
     public void Tutorial()

@@ -60,7 +60,7 @@ public class Pause_Menu : MonoBehaviour
     {
         rest_try++;
         if (Finish.active == true) rest_try = 0;
-		SceneManager.LoadScene(1);
+		SceneManager.LoadScene(3);
 
 	}
 
